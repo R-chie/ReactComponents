@@ -3,8 +3,16 @@ import PropTypes from 'prop-types';
 import './DownturnTimer.css';
 
 class DownturnTimer extends React.Component {
+    /* -------------props-------------
+    * settings:
+    *   timeupDate: str -- reference date,
+    *   timeupText: str -- text when time is up
+    * */
     static propsTypes =  {
-        settings:   PropTypes.object.isRequired,
+        settings:   PropTypes.shape({
+            timeupDate: PropTypes.string,
+            timeupText: PropTypes.string
+        }).isRequired,
     };
 
     static defaultProps = {
@@ -14,63 +22,62 @@ class DownturnTimer extends React.Component {
         super(props);
         this.state = {
             today: new Date(),
-            container: props.settings.containerId,
-            timer: new Date(props.settings.timeupDate),
-            timeupText: props.settings.timeupText
+            timer: new Date(props.settings.timeupDate)
         };
     }
 
     componentDidUpdate() {
-        setTimeout(this.tick, 1000);
+        setTimeout(this._tick, 1000);
     }
 
     componentDidMount() {
-        this.tick();
+        this._tick();
     }
 
     _countDown = () => {
-        let difference = this.state.timer - this.state.today,
-            day = Math.floor(   difference / (24*60*60*1000)),
-            hour = Math.floor(  (difference % (24*60*60*1000)) / (60*60*1000)),
-            minute = Math.floor((difference % (24*60*60*1000)) / (60*1000))%60,
-            second = Math.floor((difference % (24*60*60*1000)) / 1000)%60%60;
+        let difference = this.state.timer - this.state.today;
+        let time = [
+            {name: 'day',    value: Math.floor(   difference / (24*60*60*1000))},
+            {name: 'hour',   value: Math.floor(  (difference % (24*60*60*1000)) / (60*60*1000))},
+            {name: 'minute', value: this._addZero(Math.floor((difference % (24*60*60*1000)) / (60*1000))%60)},
+            {name: 'second', value: this._addZero(Math.floor((difference % (24*60*60*1000)) / 1000)%60%60)}
+        ];
         if (difference > 0) {
             return (
                 <Fragment>
-                    <span className="number-wrapper"><div className="line"></div>
-                        <div className="caption">DAYS</div><span className="number day">{day}</span>
-                    </span>
-                    <span className="number-wrapper"><div className="line"></div>
-                        <div className="caption">HOURS</div><span className="number hour">{hour}</span>
-                    </span>
-                    <span className="number-wrapper"><div className="line"></div>
-                        <div className="caption">MINS</div><span className="number min">{this.addZero(minute)}</span>
-                    </span>
-                    <span className="number-wrapper"><div className="line"></div>
-                        <div className="caption">SECS</div><span className="number sec">{this.addZero(second)}</span>
-                    </span>
+                    <h2>{this.state.timer.toString().slice(0,15)}</h2>
+                    {
+                        time.map((item, index) => {
+                            return (
+                            <span className="number-wrapper" key={index}>
+                                <div className="line"/>
+                                <div className="caption">{`${item.name}s`.toUpperCase()}</div><span className="number">{item.value}</span>
+                            </span>
+                            )
+                        })
+                    }
                 </Fragment>
             );
         }
        return (
-           <span className="number-wrapper"><div className="line"></div>
-               <span className="number end">{this.state.timeupText}</span>
+           <span className="number-wrapper"><div className="line"/>
+               <span className="number end">{this.props.settings.timeupText}</span>
            </span>
        )
     };
 
-    tick = () => {
+    _tick = () => {
         this.setState({
             today: new Date()
         });
     };
 
-    addZero = (num) => {
-        return ('0' + num).slice(-2);
+    _addZero = (num) => {
+        return `0${num}`.slice(-2);
     };
 
     render(){
-        return this._countDown();
+        return <div className="DownturnTimer">{this._countDown()}</div>;
     }
 }
 
