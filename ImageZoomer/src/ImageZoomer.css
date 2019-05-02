@@ -1,0 +1,17 @@
+.ImageZoomer {
+    width: 250px;
+}
+.ImageZoomer img {
+    width: 100%;
+    height: auto;
+}
+
+.ImageZoomer .zoomer {
+    text-align: center;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 2px solid;
+    position: absolute;
+}
+
